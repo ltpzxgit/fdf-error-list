@@ -1,10 +1,11 @@
 import streamlit as st
 import pandas as pd
 import re
+from io import BytesIO
 
 st.set_page_config(page_title="Log Error Extractor", layout="wide")
 
-st.title("🚨 Log Error Extractor (TXT / CSV / Excel)")
+st.title("🚨 Log Error Extractor (Multi VIN Support)")
 
 uploaded_file = st.file_uploader(
     "📥 Upload Log File",
@@ -15,8 +16,9 @@ uploaded_file = st.file_uploader(
 # REGEX
 # =========================
 REQ_ID_REGEX = r"Request ID:\s*([0-9a-fA-F\-]{36})"
-VIN_REGEX = r"VIN[:=]\s*([A-Za-z0-9]+)"
-DEVICE_REGEX = r"DeviceID[:=]\s*([A-Za-z0-9\-]+)"
+
+# ดึง vin + deviceId เป็นคู่
+PAIR_REGEX = r'"vin":"(.*?)".*?"deviceId":"(.*?)"'
 
 # =========================
 # READ FILE
@@ -49,28 +51,19 @@ def extract_data(lines):
         line = str(lines[i])
 
         if "ERROR" in line:
-            vin = None
-            device = None
+
+            # ===== หา Request ID =====
             request_id = None
-
-            # VIN
-            vin_match = re.search(VIN_REGEX, line)
-            if vin_match:
-                vin = vin_match.group(1)
-
-            # DeviceID
-            device_match = re.search(DEVICE_REGEX, line)
-            if device_match:
-                device = device_match.group(1)
-
-            # Request ID (next line)
             if i + 1 < len(lines):
                 next_line = str(lines[i + 1])
                 req_match = re.search(REQ_ID_REGEX, next_line)
                 if req_match:
                     request_id = req_match.group(1)
 
-            if request_id or vin or device:
+            # ===== หา VIN + DeviceID (หลายตัว) =====
+            pairs = re.findall(PAIR_REGEX, line)
+
+            for vin, device in pairs:
                 results.append({
                     "No.": no,
                     "Request ID": request_id,
@@ -86,26 +79,22 @@ def extract_data(lines):
 # =========================
 if uploaded_file:
     lines = read_file(uploaded_file)
-
     df = extract_data(lines)
 
-    st.success(f"✅ Extracted {len(df)} error records")
+    st.success(f"✅ Extracted {len(df)} records")
     st.dataframe(df, use_container_width=True)
 
-    # Download CSV
+    # CSV
     csv = df.to_csv(index=False).encode("utf-8")
-    st.download_button(
-        label="📥 Download CSV",
-        data=csv,
-        file_name="error_log_result.csv",
-        mime="text/csv"
-    )
+    st.download_button("📥 Download CSV", csv, "result.csv")
 
-    # Download Excel
-    excel = df.to_excel(index=False, engine='openpyxl')
+    # Excel
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False)
+
     st.download_button(
-        label="📥 Download Excel",
-        data=open("error_log_result.xlsx", "rb"),
-        file_name="error_log_result.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        "📥 Download Excel",
+        output.getvalue(),
+        "result.xlsx"
     )

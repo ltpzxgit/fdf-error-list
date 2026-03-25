@@ -86,7 +86,7 @@ if uploaded_file:
 
     # CSV
     csv = df.to_csv(index=False).encode("utf-8")
-    st.download_button("📥 Download CSV", csv, "result.csv")
+    st.download_button("📥 Download CSV", csv, "fdferrorlist.csv")
 
     # Excel
     output = BytesIO()
@@ -96,5 +96,5 @@ if uploaded_file:
     st.download_button(
         "📥 Download Excel",
         output.getvalue(),
-        "result.xlsx"
+        "fdferrorlist.xlsx"
     )

@@ -3,9 +3,9 @@ import pandas as pd
 import re
 from io import BytesIO
 
-st.set_page_config(page_title="Log Error Extractor", layout="wide")
+st.set_page_config(page_title="ITOSE - Tools", layout="wide")
 
-st.title("🚨 Log Error Extractor (Multi VIN Support)")
+st.title("ITOSE Tools - FDF ERROR LIST")
 
 uploaded_file = st.file_uploader(
     "📥 Upload Log File",

@@ -5,11 +5,11 @@ from io import BytesIO
 
 st.set_page_config(page_title="ITOSE - FDF", layout="wide")
 
-st.title("ITOSE Tools - FDF ERROR LIST")
+st.title("ITOSE Tools - FDF")
 
 uploaded_file = st.file_uploader(
     "📥 Upload Excel / CSV",
-    type=["csv", "xlsx"]
+    type=["xlsx", "csv"]
 )
 
 # =========================

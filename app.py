@@ -3,7 +3,7 @@ import pandas as pd
 import re
 from io import BytesIO
 
-st.set_page_config(page_title="ITOSE - Tools", layout="wide")
+st.set_page_config(page_title="ITOSE - FDF", layout="wide")
 
 st.title("ITOSE Tools - FDF ERROR LIST")
 
